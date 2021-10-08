@@ -891,6 +891,7 @@ class Technology(Base):
 
     tech_id = Column(Integer, primary_key=True)
     tech_name = Column(String(45))
+    tech_crop = Column(Integer, server_default=text("'0'"))
     user_name = Column(ForeignKey(u"user.user_name", ondelete=u"CASCADE"), index=True)
 
     user = relationship(u"User")

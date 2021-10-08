@@ -158,12 +158,14 @@
                             <div class="ibox-content" style="padding: 5px 20px 10px 20px;">
                                 <table width="100%">
                                     <tr>
-                                        <td width="95%">
-                                            <h2 ><strong>{{ activeProject.project_name }}</strong></h2>
-                                        </td>
-                                        <td rowspan="2" class="text-center">
-                                            <a href="https://climmob.net/blog/wiki/main-menu/" target="_blank"><img style="width: 25px; height: 25px " src="{{ request.url_for_static('landing/info.png') }}" alt="info"/> </a>
-                                        </td>
+                                        {% block project_heading_info %}
+                                            <td width="95%">
+                                                <h2 ><strong>{{ activeProject.project_name }}</strong></h2>
+                                            </td>
+                                            <td rowspan="2" class="text-center">
+                                                <a href="https://climmob.net/blog/wiki/main-menu/" target="_blank"><img style="width: 25px; height: 25px " src="{{ request.url_for_static('landing/info.png') }}" alt="info"/> </a>
+                                            </td>
+                                        {% endblock project_heading_info %}
                                     </tr>
                                     <tr>
                                         <td style="vertical-align: middle">
