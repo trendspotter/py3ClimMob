@@ -57,6 +57,10 @@
                 $('.i-checks').iCheck({
                     radioClass: 'iradio_square-green',
                 });
+
+                {% block new_project_script_extra %}
+
+                {% endblock new_project_script_extra %}
             })
         </script>
     {% endif %}

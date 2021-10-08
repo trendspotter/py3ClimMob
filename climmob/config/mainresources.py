@@ -57,6 +57,14 @@ def createResources(apppath, config):
         "inspinia/css/plugins/bootstrap-switch/bootstrap-switch.css",
         "tags",
     )
+
+    r.add_css_resource(
+        "coreresources",
+        "switchery",
+        "inspinia/css/plugins/switchery/switchery.css",
+        None,
+    )
+
     r.add_css_resource(
         "coreresources", "shuffle", "inspinia/css/plugins/shuffle/test.css", "style"
     )
@@ -250,6 +258,13 @@ def createResources(apppath, config):
         "switch",
         "inspinia/js/plugins/bootstrap-switch/bootstrap-switch.js",
         "tags",
+    )
+
+    r.add_js_resource(
+        "coreresources",
+        "switchery",
+        "inspinia/js/plugins/switchery/switchery.js",
+        None,
     )
 
     r.add_js_resource(

@@ -25,6 +25,7 @@ __all__ = [
     "IDatabase",
     "IForm",
     "IMultimedia",
+    "IProject",
 ]
 
 
@@ -355,6 +356,36 @@ class IForm(Interface):  # pragma: no cover
         :param ass_cod: Assessment ID - "" for registry
         :return: None
         """
+
+
+class IProject(Interface):  # pragma: no cover
+    """
+    Allows to hook into the processes that creates, updates and delete projects
+    """
+
+    def before_adding_project(self, request, user, project_data):
+        """
+        Called by ClimMob before creating a project.
+        :param request: Pyramid request object
+        :param user: User addint the project
+        :param project_data: Project data to add
+        Return should be True/False, Message, and project_data
+        """
+        raise NotImplementedError(
+            "translation_domain must be implemented in subclasses"
+        )
+
+    def after_adding_project(self, request, user, project_data):
+        """
+        Called by ClimMob after creating a project.
+        :param request: Pyramid request object
+        :param user: User addint the project
+        :param project_data: Project data to add
+        Return None
+        """
+        raise NotImplementedError(
+            "translation_domain must be implemented in subclasses"
+        )
 
 
 class IMultimedia(Interface):

@@ -21,6 +21,7 @@ from pyramid.response import FileResponse
 import uuid
 import os
 import datetime
+import climmob.plugins as p
 
 
 class newProject_view(privateView):
@@ -44,22 +45,33 @@ class newProject_view(privateView):
 
         if self.request.method == "POST":
             if "btn_addNewProject" in self.request.POST:
-
                 dataworking = self.getPostDict()
-
-                dataworking, error_summary, added = createProjectFunction(
-                    dataworking, error_summary, self
-                )
-                if added:
-                    self.request.session.flash(
-                        self._("The project was created successfully")
+                continue_creation = True
+                for plugin in p.PluginImplementations(p.IProject):
+                    continue_creation, error_message, modified_dataworking = plugin.before_adding_project(
+                        self.request, self.user.login, dataworking
                     )
-                    self.returnRawViewResult = True
-                    return HTTPFound(
-                        location=self.request.route_url(
-                            "dashboard", _query={"project": dataworking["project_cod"]},
+                    if not continue_creation:
+                        error_summary["plugin_error"] = error_message
+                    else:
+                        dataworking = modified_dataworking
+                    break  # Only one plugging will be called to extend before_create
+                if continue_creation:
+                    dataworking, error_summary, added = createProjectFunction(
+                        dataworking, error_summary, self
+                    )
+                    if added:
+                        for plugin in p.PluginImplementations(p.IProject):
+                            plugin.after_adding_project(self.request, self.user.login, dataworking)
+                        self.request.session.flash(
+                            self._("The project was created successfully")
                         )
-                    )
+                        self.returnRawViewResult = True
+                        return HTTPFound(
+                            location=self.request.route_url(
+                                "dashboard", _query={"project": dataworking["project_cod"]},
+                            )
+                        )
 
         return {
             "activeUser": self.user,
