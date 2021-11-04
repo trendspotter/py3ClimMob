@@ -94,7 +94,10 @@ class newtechnology_view(privateView):
                 del formdata["tech_id"]
                 formdata["user_name"] = self.user.login
                 if formdata["tech_name"] != "":
-
+                    if "tech_crop" in formdata.keys():
+                        formdata["tech_crop"] = 1
+                    else:
+                        formdata["tech_crop"] = 0
                     formdata["user_name"] = "bioversity"
                     existInGenLibrary = findTechInLibrary(formdata, self.request)
                     if existInGenLibrary == False:
@@ -159,13 +162,18 @@ class modifytechnology_view(privateView):
                 formdata["tech_id"] = self.request.matchdict["technologyid"]
 
                 if formdata["tech_name"] != "":
-
+                    if "tech_crop" in formdata.keys():
+                        formdata["tech_crop"] = 1
+                    else:
+                        formdata["tech_crop"] = 0
                     formdata["user_name"] = "bioversity"
-                    existInGenLibrary = findTechInLibrary(formdata, self.request)
+                    existInGenLibrary = findTechInLibrary(formdata, self.request, False)
                     if existInGenLibrary == False:
 
                         formdata["user_name"] = self.user.login
-                        existInPersLibrary = findTechInLibrary(formdata, self.request)
+                        existInPersLibrary = findTechInLibrary(
+                            formdata, self.request, False
+                        )
                         if existInPersLibrary == False:
                             formdata["user_name"] = self.user.login
                             update, message = updateTechnology(formdata, self.request)

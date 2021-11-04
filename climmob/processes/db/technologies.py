@@ -59,6 +59,7 @@ def getUserTechs(user, request):
             {
                 "tech_id": technology[0].tech_id,
                 # "tech_name": technology[0].tech_name,
+                "tech_crop": technology[0].tech_crop,
                 "tech_name": technology[2],
                 "user_name": technology[0].user_name,
                 "quantity": technology.quantity,
@@ -96,15 +97,26 @@ def getUserTechById(tech_id, request):
     return result
 
 
-def findTechInLibrary(data, request):
-    result = (
-        request.dbsession.query(Technology)
-        .filter(
-            Technology.user_name == data["user_name"],
-            Technology.tech_name == data["tech_name"],
+def findTechInLibrary(data, request, adding=True):
+    if adding:
+        result = (
+            request.dbsession.query(Technology)
+            .filter(
+                Technology.user_name == data["user_name"],
+                Technology.tech_name == data["tech_name"],
+            )
+            .all()
         )
-        .all()
-    )
+    else:
+        result = (
+            request.dbsession.query(Technology)
+            .filter(
+                Technology.user_name == data["user_name"],
+                Technology.tech_name == data["tech_name"],
+                Technology.tech_id != data["tech_id"],
+            )
+            .all()
+        )
 
     if not result:
         return False

@@ -10,6 +10,7 @@
     {% cssresource request,'coreresources','sweet' %}
     {% cssresource request,'coreresources','footable' %}
     {% cssresource request,'coreresources','tour' %}
+    {% cssresource request,'coreresources','switchery' %}
 {% endblock css %}
 
 {% block topScripts %}
@@ -22,6 +23,7 @@
     {% jsresource request,'coreresources','toastr' %}
     {% include 'snippets/delete.jinja2' %}
     {% jsresource request,'coreresources','tour' %}
+    {% jsresource request,'coreresources','switchery' %}
 {% endblock topScripts %}
 
 {% block pageheading %}
@@ -188,9 +190,22 @@
             $(this).addClass('tableHover2').siblings().removeClass('tableHover2');
         });
 
+
+        var switchery = 0;
+
         $(document).ready(function () {
 
             $('.footable').footable();
+
+            var elem = document.querySelector('.js-switch');
+            switchery = new Switchery(elem, { color: '#1AB394' });
+
+            elem.onchange = function() {
+                if($("#tech_id").val() != "")
+                {
+                    $("#btn_modify_technology").css('display', 'initial');
+                }
+            };
 
             $('.i-checks-Black').iCheck({
                 radioClass: 'iradio_square-black',
@@ -237,7 +252,16 @@
             {% endif %}
         });
 
-
+        function setSwitchery(switchElement, checkedBool) {
+            if ((checkedBool && !switchElement.isChecked()) || (!checkedBool && switchElement.isChecked())) {
+                switchElement.setPosition(true);
+                switchElement.handleOnchange(true);
+                if($("#tech_id").val() != "")
+                {
+                    $("#btn_modify_technology").css('display', 'initial')
+                }
+            }
+        }
 
         function showCreateTechnology() {
             cleanBtsTechnologyOptions()
@@ -247,8 +271,10 @@
             $("#btn_add_technology").css('display','initial')
             $("#tech_name").prop('readonly',false)
             $("#tech_name").val("")
+            setSwitchery(switchery,false)
             $(".tech_id").val("")
             $("#div_create_technology").css('display','initial')
+            $("#btn_modify_technology").css('display', 'none')
 
             if ($('.closeError').length) {
                 $(".closeError").click()
@@ -286,6 +312,11 @@
             cleanBtsTechnology()
             $(".tech_id").val(tech.tech_id)
             $("#tech_name").val(tech.tech_name)
+            if (tech.tech_crop == 1)
+                setSwitchery(switchery,true);
+            else
+                setSwitchery(switchery,false);
+            $("#btn_modify_technology").css('display', 'none')
 
             allHTML = "<h4>{{ _("List of technology options:") }}</h4>"
             for(var i=0; i<tech.tech_alias.length; i++)
