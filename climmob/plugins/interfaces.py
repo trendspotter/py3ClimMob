@@ -372,7 +372,7 @@ class IProject(Interface):  # pragma: no cover
         Return should be True/False, Message, and project_data
         """
         raise NotImplementedError(
-            "translation_domain must be implemented in subclasses"
+            "before_adding_project must be implemented in subclasses"
         )
 
     def after_adding_project(self, request, user, project_data):
@@ -384,7 +384,31 @@ class IProject(Interface):  # pragma: no cover
         Return None
         """
         raise NotImplementedError(
-            "translation_domain must be implemented in subclasses"
+            "after_adding_project must be implemented in subclasses"
+        )
+
+    def before_modifying_project(self, request, user, project_data):
+        """
+        Called by ClimMob before modifying a project.
+        :param request: Pyramid request object
+        :param user: User addint the project
+        :param project_data: Project data to modify
+        Return should be True/False, Message, and project_data
+        """
+        raise NotImplementedError(
+            "before_modifying_project must be implemented in subclasses"
+        )
+
+    def after_modifying_project(self, request, user, project_data):
+        """
+        Called by ClimMob after modifying a project.
+        :param request: Pyramid request object
+        :param user: User addint the project
+        :param project_data: Project data to modify
+        Return None
+        """
+        raise NotImplementedError(
+            "after_modifying_project must be implemented in subclasses"
         )
 
 

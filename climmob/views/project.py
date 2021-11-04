@@ -46,9 +46,16 @@ class newProject_view(privateView):
         if self.request.method == "POST":
             if "btn_addNewProject" in self.request.POST:
                 dataworking = self.getPostDict()
+                dataworking["project_registration_and_analysis"] = int(
+                    dataworking["project_registration_and_analysis"]
+                )
                 continue_creation = True
                 for plugin in p.PluginImplementations(p.IProject):
-                    continue_creation, error_message, modified_dataworking = plugin.before_adding_project(
+                    (
+                        continue_creation,
+                        error_message,
+                        modified_dataworking,
+                    ) = plugin.before_adding_project(
                         self.request, self.user.login, dataworking
                     )
                     if not continue_creation:
@@ -62,14 +69,17 @@ class newProject_view(privateView):
                     )
                     if added:
                         for plugin in p.PluginImplementations(p.IProject):
-                            plugin.after_adding_project(self.request, self.user.login, dataworking)
+                            plugin.after_adding_project(
+                                self.request, self.user.login, dataworking
+                            )
                         self.request.session.flash(
                             self._("The project was created successfully")
                         )
                         self.returnRawViewResult = True
                         return HTTPFound(
                             location=self.request.route_url(
-                                "dashboard", _query={"project": dataworking["project_cod"]},
+                                "dashboard",
+                                _query={"project": dataworking["project_cod"]},
                             )
                         )
 
@@ -89,10 +99,6 @@ def createProjectFunction(dataworking, error_summary, self):
     dataworking["project_regstatus"] = 0
     dataworking["project_lat"] = ""
     dataworking["project_lon"] = ""
-
-    dataworking["project_registration_and_analysis"] = int(
-        dataworking["project_registration_and_analysis"]
-    )
 
     dataworking["project_localvariety"] = 1
 
@@ -154,6 +160,7 @@ class modifyProject_view(privateView):
                 data = self.getPostDict()
                 data["user_name"] = self.user.login
                 data["project_cod"] = projectid
+                data["project_regstatus"] = cdata["project_regstatus"]
                 if cdata["project_regstatus"] != 0:
                     data["project_numobs"] = cdata["project_numobs"]
                     data["project_numcom"] = cdata["project_numcom"]
@@ -174,23 +181,42 @@ class modifyProject_view(privateView):
                 if isNecessarygenerateCombinations:
                     changeTheStateOfCreateComb(self.user.login, projectid, self.request)
 
-                modified, message = modifyProject(
-                    self.user.login, projectid, data, self.request
-                )
-                if not modified:
-                    error_summary = {"dberror": message}
-                else:
-                    self.request.session.flash(
-                        self._("The project was modified successfully")
+                continue_modify = True
+                for plugin in p.PluginImplementations(p.IProject):
+                    (
+                        continue_modify,
+                        error_message,
+                        modified_data,
+                    ) = plugin.before_modifying_project(
+                        self.request, self.user.login, data
                     )
-                    self.returnRawViewResult = True
-                    return HTTPFound(location=self.request.route_url("dashboard"))
+                    if not continue_modify:
+                        error_summary["plugin_error"] = error_message
+                    else:
+                        data = modified_data
+                    break  # Only one plugging will be called to extend before_create
+                if continue_modify:
+                    modified, message = modifyProject(
+                        self.user.login, projectid, data, self.request
+                    )
+                    if not modified:
+                        error_summary = {"dberror": message}
+                    else:
+                        for plugin in p.PluginImplementations(p.IProject):
+                            plugin.after_modifying_project(
+                                self.request, self.user.login, data
+                            )
 
-                if int(data["project_localvariety"]) == 1:
-                    data["project_localvariety"] = "on"
-                else:
-                    data["project_localvariety"] = "off"
+                        self.request.session.flash(
+                            self._("The project was modified successfully")
+                        )
+                        self.returnRawViewResult = True
+                        return HTTPFound(location=self.request.route_url("dashboard"))
 
+                    if int(data["project_localvariety"]) == 1:
+                        data["project_localvariety"] = "on"
+                    else:
+                        data["project_localvariety"] = "off"
         return {
             "activeUser": self.user,
             "indashboard": True,
