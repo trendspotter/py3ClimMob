@@ -3,6 +3,7 @@ from ..processes import getActiveProject, getQuestionsByType, getJSONResult
 from ..products.analysis.analysis import create_analysis
 from ..products.analysisdata.analysisdata import create_datacsv
 from pyramid.httpexceptions import HTTPFound
+import climmob.plugins as p
 
 
 class analysisDataView(privateView):
@@ -65,7 +66,8 @@ def processToGenerateTheReport(user, dataworking, request, variables, infosheet)
 
     locale = request.locale_name
     info = getJSONResult(user, dataworking["project_cod"], request)
-
+    for plugin in p.PluginImplementations(p.IReport):
+        plugin.on_generate(request, user, dataworking["project_cod"], info)
     create_analysis(
         locale,
         user,

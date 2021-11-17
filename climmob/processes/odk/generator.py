@@ -104,6 +104,8 @@ def createDatabase(xlsxFile, outputDir, schema, keyVar, preFix, dropSchema, requ
     paths = ["JXFormToMysql", "jxformtomysql"]
     jxform_to_mysql = os.path.join(request.registry.settings["odktools.path"], *paths)
 
+    print("Using: {}".format(xlsxFile))
+
     filename, file_extension = os.path.splitext(xlsxFile)
     json_file = filename + ".srv"
     warnings = []
@@ -202,6 +204,7 @@ def createDatabase(xlsxFile, outputDir, schema, keyVar, preFix, dropSchema, requ
                 log.error(msg)
 
     print("****createDatabase**Calling ODKToMySQL******")
+    print(" ".join(args))
     try:
         info = check_output(args)
     except CalledProcessError as e:

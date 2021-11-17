@@ -1,6 +1,16 @@
 import os
 from lxml import etree
-from ...models import Assessment, Question, Project, mapFromSchema
+from ...models import (
+    Assessment,
+    Question,
+    Project,
+    mapFromSchema,
+    Prjtech,
+    Technology,
+    Techalia,
+    Prjalia,
+    AssDetail,
+)
 import datetime, decimal
 from climmob.models.repository import sql_fetch_all, sql_fetch_one
 
@@ -554,6 +564,58 @@ def getJSONResult(
                 if isinstance(value, decimal.Decimal):
                     mappedData[key] = str(value)
             data["project"] = mappedData
+            data["project"]["climmob-server"] = request.application_url
+
+            r_techs = (
+                request.dbsession.query(Technology)
+                .filter(Prjtech.tech_id == Technology.tech_id)
+                .filter(Prjtech.user_name == user)
+                .filter(Prjtech.project_cod == project)
+                .all()
+            )
+            technologies = mapFromSchema(r_techs)
+            for a_technology in technologies:
+                r_opts = (
+                    request.dbsession.query(Techalia)
+                    .filter(Prjalia.tech_used == Techalia.tech_id)
+                    .filter(Prjalia.alias_used == Techalia.alias_id)
+                    .filter(Prjalia.user_name == user)
+                    .filter(Prjalia.project_cod == project)
+                    .filter(Prjalia.tech_id == a_technology["tech_id"])
+                    .all()
+                )
+                a_technology["options"] = mapFromSchema(r_opts)
+
+                r_opts = (
+                    request.dbsession.query(Prjalia)
+                    .filter(Prjalia.tech_used.is_(None))
+                    .filter(Prjalia.alias_used.is_(None))
+                    .all()
+                )
+                project_level_options = mapFromSchema(r_opts)
+                if project_level_options:
+                    a_technology["project_level_options"] = []
+                    for a_opt in project_level_options:
+                        a_technology["project_level_options"] = a_opt["alias_name"]
+
+            data["technologies"] = technologies
+
+            prj_questions = (
+                request.dbsession.query(Question)
+                .filter(Question.question_id == AssDetail.question_id)
+                .filter(AssDetail.user_name == user)
+                .filter(AssDetail.project_cod == project)
+                .all()
+            )
+            questions = mapFromSchema(prj_questions)
+            data["questions"] = []
+            for a_question in questions:
+                found = False
+                for a_qts in data["questions"]:
+                    if a_qts["question_id"] == a_question["question_id"]:
+                        found = True
+                if not found:
+                    data["questions"].append(a_question)
 
             if includeRegistry:
                 registryXML = os.path.join(

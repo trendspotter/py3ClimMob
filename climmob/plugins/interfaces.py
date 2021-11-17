@@ -26,6 +26,7 @@ __all__ = [
     "IForm",
     "IMultimedia",
     "IProject",
+    "IReport",
 ]
 
 
@@ -422,5 +423,17 @@ class IMultimedia(Interface):
         :param projectid: Project ID
         :param formId: Form: assessment - registry
         :param ass_cod: Assessment ID - "" for registry
+        :return: None
+        """
+
+
+class IReport(Interface):
+    def on_generate(self, request, user, project, input_data):
+        """
+        Called by ClimMob so plugins can perform actions when generating the report
+        :param request: ``pyramid.request`` object
+        :paran path: Path for the result
+        :param request: Pyramid request object
+        :param input_data: The input data in JSON format used in the report
         :return: None
         """
